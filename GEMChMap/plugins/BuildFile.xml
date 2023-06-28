@@ -1,7 +1,7 @@
 <use   name="CondCore/PopCon"/>
 <use   name="CondFormats/DataRecord"/>
 <use   name="CondFormats/GEMObjects"/>
-<use   name="myCondTools/GEM"/>
+<use   name="conditions/GEMChMap"/>
 <use   name="FWCore/Framework"/>
 <use   name="FWCore/ParameterSet"/>
 <library   file="*.cc" name="CondToolsGEMPlugins">

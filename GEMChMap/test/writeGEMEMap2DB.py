@@ -2,10 +2,8 @@ import FWCore.ParameterSet.Config as cms
 import FWCore.ParameterSet.VarParsing as VarParsing
 from CondCore.CondDB.CondDB_cfi import *
 
-#sourceConnection = "oracle://cms_orcoff_prep/CMS_GEM_APPUSER_R"
 sourceConnection = 'oracle://cms_omds_lb/CMS_RPC_CONF'
 sourceConnection = 'oracle://cms_omds_adg/CMS_COND_GENERAL_R'
-#sourceConnection = 'oracle://cms_omds_lb/CMS_COND_GENERAL_R'
 
 confType = "2022"
 
@@ -79,21 +77,9 @@ process.WriteInDB = cms.EDAnalyzer( "GEMEMapDBWriter",
                                     Source = cms.PSet( SourceDBConnection,
                                                        QC8ConfType = cms.string("vfatTypeListQC8_%s.csv"%confType),
                                                        loggingOn = cms.untracked.bool( False ),
-                                                       Validate = cms.untracked.int32( 0 ) ) )
+                                                       Validate = cms.untracked.int32( 0 ),
+                                                       chamberMap = cms.FileInPath('myCondTools/GEM/data/chamberMap2022.csv'),
+                                                       stripMap = cms.FileInPath('myCondTools/GEM/data/stripChannelMap.csv'))
+)
 
-
-
-"""
-process.WriteInDB = cms.EDAnalyzer( "GEMEMapDBWriter",
-                                    SinceAppendMode = cms.bool( True ),
-                                    record = cms.string( 'GEMChMapRcd' ),
-                                    loggingOn = cms.untracked.bool( False ),
-                                    Source = cms.PSet( SourceDBConnection,
-                                                       OnlineAuthPath = cms.untracked.string('/afs/cern.ch/cms/DB/conddb/'),
-                                                       #OnlineAuthPath = cms.untracked.string('/afs/cern.ch/cms/DB/conddb/ADG/.cms_cond/db.key'),
-                                                       Validate = cms.untracked.int32( 0 ), 
-                                                       OnlineConn = cms.untracked.string('oracle://cms_omds_adg/CMS_COND_GENERAL_R') ) )
-                                                       #OnlineConn = cms.untracked.string('oracle://cms_omds_lb/CMS_GEM_MUON_VIEW') ) )
-"""
 process.p = cms.Path( process.WriteInDB )
-

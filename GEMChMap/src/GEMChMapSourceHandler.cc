@@ -1,4 +1,4 @@
-#include "myCondTools/GEM/interface/GEMEMapSourceHandler.h"
+#include "conditions/GEMChMap/interface/GEMChMapSourceHandler.h"
 #include "CondCore/CondDB/interface/ConnectionPool.h"
 #include "CondCore/DBOutputService/interface/PoolDBOutputService.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -21,31 +21,33 @@
 #include <vector>
 
 
-popcon::GEMEMapSourceHandler::GEMEMapSourceHandler( const edm::ParameterSet& ps ):
-  m_name( ps.getUntrackedParameter<std::string>( "name", "GEMEMapSourceHandler" ) ),
-  m_dummy( ps.getUntrackedParameter<int>( "WriteDummy", 0 ) ),
-  m_validate( ps.getUntrackedParameter<int>( "Validate", 1 ) ),
-  m_connect( ps.getParameter<std::string>( "connect" ) ),
-  m_connectionPset( ps.getParameter<edm::ParameterSet>( "DBParameters" ) ),
-  m_conf_type( ps.getParameter<std::string>("QC8ConfType"))
+popcon::GEMChMapSourceHandler::GEMChMapSourceHandler( const edm::ParameterSet& ps ):
+  name_( ps.getUntrackedParameter<std::string>( "name", "GEMChMapSourceHandler" ) ),
+  dummy_( ps.getUntrackedParameter<int>( "WriteDummy", 0 ) ),
+  validate_( ps.getUntrackedParameter<int>( "Validate", 1 ) ),
+  connect_( ps.getParameter<std::string>( "connect" ) ),
+  connect_ionPset( ps.getParameter<edm::ParameterSet>( "DBParameters" ) ),
+  conf_type_( ps.getParameter<std::string>("QC8ConfType")),
+  chamberMapFile_( ps.getParameter<edm::FileInPath>("chamberMap")),
+  stripMapFile_( ps.getParameter<edm::FileInPath>("stripMap"))
 {
 }
 
-popcon::GEMEMapSourceHandler::~GEMEMapSourceHandler()
+popcon::GEMChMapSourceHandler::~GEMChMapSourceHandler()
 {
 }
 
-void popcon::GEMEMapSourceHandler::getNewObjects()
+void popcon::GEMChMapSourceHandler::getNewObjects()
 {
   
-  edm::LogInfo( "GEMEMapSourceHandler" ) << "[" << "GEMEMapSourceHandler::" << __func__ << "]:" << m_name << ": "
+  edm::LogInfo( "GEMChMapSourceHandler" ) << "[" << "GEMChMapSourceHandler::" << __func__ << "]:" << name_ << ": "
                                          << "BEGIN" << std::endl;
   
   edm::Service<cond::service::PoolDBOutputService> mydbservice;
   
   // first check what is already there in offline DB
   Ref payload;
-  if(m_validate==1 && tagInfo().size>0) {
+  if(validate_==1 && tagInfo().size>0) {
     payload = lastPayload();
   }
   
@@ -56,20 +58,13 @@ void popcon::GEMEMapSourceHandler::getNewObjects()
   tm * ptm = gmtime(&rawtime);//GMT time
   char buffer[20];
   strftime(buffer,20,"%d/%m/%Y_%H:%M:%S",ptm);
-  std::string eMap_version( buffer );
-  eMap =  new GEMChMap(eMap_version);
-  
-  std::string baseCMS = std::string(getenv("CMSSW_BASE"))+std::string("/src/myCondTools/GEM/data/");  
-  std::vector<std::string> mapfiles;
+  std::string chMap_version( buffer );
+  chMap =  new GEMChMap(chMap_version);
 
-  mapfiles.push_back("chamberMap2022.csv");
-  mapfiles.push_back("stripChannelMap.csv");
   // Chamber Map 
   std::string field, line;
-  std::string filename(baseCMS+mapfiles[0]);
-  std::ifstream maptype(filename.c_str());
+  std::ifstream maptype(chamberMapFile_.fullPath());;
   //std::string buf("");
-  std::cout << filename << std::endl;
   while(std::getline(maptype, line)){
     unsigned int fedId_, amcNum_, gebId_;
     //uint8_t amcNum_, gebId_;
@@ -109,13 +104,13 @@ void popcon::GEMEMapSourceHandler::getNewObjects()
                         0);
     dc.chamberType = chamberType_;
 
-    eMap->add(ec,dc);
+    chMap->add(ec,dc);
 
     GEMChMap::sectorEC amcEC;
     amcEC.fedId = fedId_;
     amcEC.amcNum = amcNum_;
 
-    if (!eMap->isValidAMC(fedId_, amcNum_)) eMap->add(amcEC);
+    if (!chMap->isValidAMC(fedId_, amcNum_)) chMap->add(amcEC);
     
     std::cout << "fedId: " << fedId_ << ", AMC#: " << amcNum_ << ", gebId: " << gebId_ <<
     ", region: " << region_ << ", station: " << station_ << ", layer: " << layer_ << ", chamberSec: " << chamberSec_ << 
@@ -123,9 +118,7 @@ void popcon::GEMEMapSourceHandler::getNewObjects()
   }
 
   // VFAT Channel-Strip Map
-  std::string filename2(baseCMS+mapfiles[1]);
-  std::ifstream maptype2(filename2.c_str());
-  std::cout << filename2 << std::endl;
+  std::ifstream maptype2(stripMapFile_.fullPath());;
   while(std::getline(maptype2, line)){
     int chamberType_, vfat_, vfatCh_, iEta_, strip_;
 
@@ -154,27 +147,27 @@ void popcon::GEMEMapSourceHandler::getNewObjects()
     sMap.iEta = iEta_;
     sMap.stNum = strip_;
 
-    eMap->add(cMap, sMap);
-    eMap->add(sMap, cMap);
+    chMap->add(cMap, sMap);
+    chMap->add(sMap, cMap);
 
     GEMChMap::vfatEC ec;
     ec.vfatAdd = vfat_;
     ec.chamberType = chamberType_;
 
-    eMap->add(chamberType_, vfat_);
-    eMap->add(ec, iEta_);
+    chMap->add(chamberType_, vfat_);
+    chMap->add(ec, iEta_);
   }
     
   cond::Time_t snc = mydbservice->currentTime();  
   // look for recent changes
   int difference=1;
   if (difference==1) {
-    m_to_transfer.push_back(std::make_pair((GEMChMap*)eMap,snc));
+    m_to_transfer.push_back(std::make_pair((GEMChMap*)chMap,snc));
   }
 }
 
 // // additional work (I added these two functions: ConnectOnlineDB and DisconnectOnlineDB)
-void popcon::GEMEMapSourceHandler::ConnectOnlineDB( const std::string& connect, const edm::ParameterSet& connectionPset )
+void popcon::GEMChMapSourceHandler::ConnectOnlineDB( const std::string& connect, const edm::ParameterSet& connectionPset )
 {
   cond::persistency::ConnectionPool connection;
   connection.setParameters( connectionPset );
@@ -182,7 +175,7 @@ void popcon::GEMEMapSourceHandler::ConnectOnlineDB( const std::string& connect, 
   session = connection.createSession( connect,true );
 }
 
-void popcon::GEMEMapSourceHandler::DisconnectOnlineDB()
+void popcon::GEMChMapSourceHandler::DisconnectOnlineDB()
 {
   session.close();
 }

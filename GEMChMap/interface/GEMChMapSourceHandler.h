@@ -1,5 +1,5 @@
-#ifndef GEMEMAPSOURCEHANDLER
-#define GEMEMAPSOURCEHANDLER
+#ifndef GEMCHMAPSOURCEHANDLER
+#define GEMCHMAPSOURCEHANDLER
 
 #include "CondCore/PopCon/interface/PopConSourceHandler.h"
 #include "CondFormats/GEMObjects/interface/GEMChMap.h"
@@ -9,30 +9,32 @@
 
 namespace popcon
 {
-  class GEMEMapSourceHandler : public popcon::PopConSourceHandler<GEMChMap>
+  class GEMChMapSourceHandler : public popcon::PopConSourceHandler<GEMChMap>
   {
       
   public:
       
-    GEMEMapSourceHandler( const edm::ParameterSet& ps );
-    ~GEMEMapSourceHandler();
+    GEMChMapSourceHandler( const edm::ParameterSet& ps );
+    ~GEMChMapSourceHandler();
     void getNewObjects();
     void ConnectOnlineDB( const std::string& connect, const edm::ParameterSet& connectionPset ); // additional work
     void DisconnectOnlineDB(); // additional work
-    void readGEMEMap();
-    std::string id() const { return m_name; }
+    void readGEMChMap();
+    std::string id() const { return name_; }
       
   private:
       
-    GEMChMap * eMap;
+    GEMChMap * chMap;
     cond::persistency::Session session; // additional work
-    std::string m_name;
-    int m_dummy;
-    int m_validate;
-    std::string m_connect;
+    std::string name_;
+    int dummy_;
+    int validate_;
+    std::string connect_;
     std::string m_authpath;
-    edm::ParameterSet m_connectionPset;
-    std::string m_conf_type;
+    edm::ParameterSet connect_ionPset;
+    std::string conf_type_;
+    edm::FileInPath chamberMapFile_;
+    edm::FileInPath stripMapFile_;
   };
 }
 #endif
