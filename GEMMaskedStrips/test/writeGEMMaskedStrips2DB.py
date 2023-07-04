@@ -14,7 +14,7 @@ options.register( 'runNumber',
                   VarParsing.VarParsing.varType.int,
                   "Run number to be uploaded." )
 options.register( 'destinationConnection',
-                  'sqlite_file:GEMChMap_{}.db'.format(confType), #default value
+                  'sqlite_file:GEMMaskedStrips_{}.db'.format(confType), #default value
                   VarParsing.VarParsing.multiplicity.singleton,
                   VarParsing.VarParsing.varType.string,
                   "Connection string to the DB where payloads will be possibly written." )
@@ -26,7 +26,7 @@ options.register( 'targetConnection',
                      if not empty (default), this provides the latest IOV and payloads to compare;
                      it is the DB where payloads should be finally uploaded.""" )
 options.register( 'tag',
-                  'GEMChMap2022',
+                  'GEMMaskedStripsRcd',
                   VarParsing.VarParsing.multiplicity.singleton,
                   VarParsing.VarParsing.varType.string,
                   "Tag written in destinationConnection and finally appended in targetConnection." )
@@ -68,18 +68,16 @@ process.source = cms.Source( "EmptyIOVSource",
 process.PoolDBOutputService = cms.Service( "PoolDBOutputService",
                                            CondDBConnection,
                                            timetype = cms.untracked.string( 'runnumber' ),
-                                           toPut = cms.VPSet( cms.PSet( record = cms.string( 'GEMChMapRcd' ),
+                                           toPut = cms.VPSet( cms.PSet( record = cms.string( 'GEMMaskedStripsRcd' ),
                                                                         tag = cms.string( options.tag ) ) ) )
 
-process.WriteInDB = cms.EDAnalyzer( "GEMEMapDBWriter",
+process.WriteInDB = cms.EDAnalyzer( "GEMMaskedStripsDBWriter",
                                     SinceAppendMode = cms.bool( True ),
-                                    record = cms.string( 'GEMChMapRcd' ),
+                                    record = cms.string( 'GEMMaskedStripsRcd' ),
                                     Source = cms.PSet( SourceDBConnection,
-                                                       QC8ConfType = cms.string("vfatTypeListQC8_%s.csv"%confType),
                                                        loggingOn = cms.untracked.bool( False ),
                                                        Validate = cms.untracked.int32( 0 ),
-                                                       chamberMap = cms.FileInPath('myCondTools/GEM/data/chamberMap2022.csv'),
-                                                       stripMap = cms.FileInPath('myCondTools/GEM/data/stripChannelMap.csv'))
+                                                       maskedStrip = cms.FileInPath('conditions/GEMMaskedStrips/data/masked-strips.dat'))
 )
 
 process.p = cms.Path( process.WriteInDB )

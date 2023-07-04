@@ -1,9 +1,9 @@
 <use   name="CondCore/PopCon"/>
 <use   name="CondFormats/DataRecord"/>
 <use   name="CondFormats/GEMObjects"/>
-<use   name="conditions/GEMChMap"/>
+<use   name="conditions/GEMMaskedStrips"/>
 <use   name="FWCore/Framework"/>
 <use   name="FWCore/ParameterSet"/>
-<library   file="*.cc" name="CondToolsGEMChMapPlugins">
+<library   file="*.cc" name="CondToolsGEMMaskedStripsPlugins">
   <flags   EDM_PLUGIN="1"/>
 </library>
