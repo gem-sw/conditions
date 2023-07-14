@@ -5,7 +5,7 @@ from CondCore.CondDB.CondDB_cfi import *
 sourceConnection = 'oracle://cms_omds_lb/CMS_RPC_CONF'
 sourceConnection = 'oracle://cms_omds_adg/CMS_COND_GENERAL_R'
 
-confType = "2022"
+confType = "2023"
 
 options = VarParsing.VarParsing()
 options.register( 'runNumber',
@@ -26,7 +26,7 @@ options.register( 'targetConnection',
                      if not empty (default), this provides the latest IOV and payloads to compare;
                      it is the DB where payloads should be finally uploaded.""" )
 options.register( 'tag',
-                  'GEMChMap2022',
+                  'GEMChMapRcd',
                   VarParsing.VarParsing.multiplicity.singleton,
                   VarParsing.VarParsing.varType.string,
                   "Tag written in destinationConnection and finally appended in targetConnection." )
@@ -75,7 +75,6 @@ process.WriteInDB = cms.EDAnalyzer( "GEMChMapDBWriter",
                                     SinceAppendMode = cms.bool( True ),
                                     record = cms.string( 'GEMChMapRcd' ),
                                     Source = cms.PSet( SourceDBConnection,
-                                                       QC8ConfType = cms.string("vfatTypeListQC8_%s.csv"%confType),
                                                        loggingOn = cms.untracked.bool( False ),
                                                        Validate = cms.untracked.int32( 0 ),
                                                        chamberMap = cms.FileInPath('conditions/GEMChMap/data/chamberMap2022.csv'),

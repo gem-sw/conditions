@@ -32,7 +32,6 @@ namespace popcon
     std::string connect_;
     std::string m_authpath;
     edm::ParameterSet connect_ionPset;
-    std::string conf_type_;
     edm::FileInPath chamberMapFile_;
     edm::FileInPath stripMapFile_;
   };

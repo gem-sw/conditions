@@ -27,7 +27,6 @@ popcon::GEMChMapSourceHandler::GEMChMapSourceHandler( const edm::ParameterSet& p
   validate_( ps.getUntrackedParameter<int>( "Validate", 1 ) ),
   connect_( ps.getParameter<std::string>( "connect" ) ),
   connect_ionPset( ps.getParameter<edm::ParameterSet>( "DBParameters" ) ),
-  conf_type_( ps.getParameter<std::string>("QC8ConfType")),
   chamberMapFile_( ps.getParameter<edm::FileInPath>("chamberMap")),
   stripMapFile_( ps.getParameter<edm::FileInPath>("stripMap"))
 {
