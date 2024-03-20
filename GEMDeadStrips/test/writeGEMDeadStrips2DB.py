@@ -14,7 +14,7 @@ options.register( 'runNumber',
                   VarParsing.VarParsing.varType.int,
                   "Run number to be uploaded." )
 options.register( 'destinationConnection',
-                  'sqlite_file:GEMMaskedStrips_{}.db'.format(confType), #default value
+                  'sqlite_file:GEMDeadStrips_{}.db'.format(confType), #default value
                   VarParsing.VarParsing.multiplicity.singleton,
                   VarParsing.VarParsing.varType.string,
                   "Connection string to the DB where payloads will be possibly written." )
@@ -26,7 +26,7 @@ options.register( 'targetConnection',
                      if not empty (default), this provides the latest IOV and payloads to compare;
                      it is the DB where payloads should be finally uploaded.""" )
 options.register( 'tag',
-                  'GEMMaskedStripsRcd',
+                  'GEMDeadStripsRcd',
                   VarParsing.VarParsing.multiplicity.singleton,
                   VarParsing.VarParsing.varType.string,
                   "Tag written in destinationConnection and finally appended in targetConnection." )
@@ -68,16 +68,16 @@ process.source = cms.Source( "EmptyIOVSource",
 process.PoolDBOutputService = cms.Service( "PoolDBOutputService",
                                            CondDBConnection,
                                            timetype = cms.untracked.string( 'runnumber' ),
-                                           toPut = cms.VPSet( cms.PSet( record = cms.string( 'GEMMaskedStripsRcd' ),
+                                           toPut = cms.VPSet( cms.PSet( record = cms.string( 'GEMDeadStripsRcd' ),
                                                                         tag = cms.string( options.tag ) ) ) )
 
-process.WriteInDB = cms.EDAnalyzer( "GEMMaskedStripsDBWriter",
+process.WriteInDB = cms.EDAnalyzer( "GEMDeadStripsDBWriter",
                                     SinceAppendMode = cms.bool( True ),
-                                    record = cms.string( 'GEMMaskedStripsRcd' ),
+                                    record = cms.string( 'GEMDeadStripsRcd' ),
                                     Source = cms.PSet( SourceDBConnection,
                                                        loggingOn = cms.untracked.bool( False ),
                                                        Validate = cms.untracked.int32( 0 ),
-                                                       maskedStrip = cms.FileInPath('conditions/GEMMaskedStrips/data/masked-strips-dummy.dat'))
+                                                       maskedStrip = cms.FileInPath('conditions/GEMDeadStrips/data/dead-strips-dummy.dat'))
 )
 
 process.p = cms.Path( process.WriteInDB )
